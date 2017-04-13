@@ -1,11 +1,10 @@
-#include <Arduino.h>
-
 #ifndef _MOTORDRIVER_H
 #define _MOTORDRIVER_H
 
+#include <Arduino.h>
 
 class MotorDriver{
-  uint8_t A, B, P;
+  int A, B, P;
   public:
     MotorDriver(int pinA, int pinB, int pwmPin) : A(pinA), B(pinB), P(pwmPin) {}
     void init();
