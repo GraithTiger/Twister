@@ -1,6 +1,6 @@
-#include "main.h"
+#include "twister.h"
 #include <Wire.h>
-#include "libraries/VL53L0X/"
+#include "src/VL53L0X/VL53L0X.h"
 #include <Servo.h>
 
 //#define XSHUT_pin6 not required for address change

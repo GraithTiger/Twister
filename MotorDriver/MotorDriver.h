@@ -1,12 +1,18 @@
 #include <Arduino.h>
 
-#ifndef MOTORDRIVER_H
-#define MOTORDRIVER_H
+#ifndef _MOTORDRIVER_H
+#define _MOTORDRIVER_H
 
-void setup();
-void loop();
 
-class Motor
-
+class MotorDriver{
+  int A, B, P;
+  public:
+    MotorDriver(int pinA, int pinB, int pwmPin) : A(pinA), B(pinB), P(pwmPin) {}
+    void init();
+    void forward(int speed);
+    void backward(int speed);
+    void off();
+    void brake(bool high = false);
+};
 
 #endif
