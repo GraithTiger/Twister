@@ -3,7 +3,7 @@
 
 #define INA 9
 #define INB 10
-#define PWM 13
+#define PWM 11
 
 MotorDriver testmotor = MotorDriver(INA, INB, PWM);
 

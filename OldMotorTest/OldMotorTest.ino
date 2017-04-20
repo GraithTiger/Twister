@@ -1,6 +1,6 @@
-const int INA = 8;
+const int INA = 9;
 const int INB = 10;
-const int PWM = 9;
+const int PWM = 11;
 int speed = 0;
 
 void setup(){
