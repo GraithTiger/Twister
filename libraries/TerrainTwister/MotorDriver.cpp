@@ -2,34 +2,31 @@
 
 
 void MotorDriver::init(){
-  pinMode(A,OUTPUT);
-  pinMode(B,OUTPUT);
-  pinMode(P,OUTPUT);
-  this->off();
+	if (A>=0) pinMode(A,OUTPUT);
+	if (B>=0) pinMode(B,OUTPUT);
+	if (P>=0) pinMode(P,OUTPUT);
+	if (CS>=0) pinMode(CS, INPUT);
+	this->off();
 }
 
-void MotorDriver::forward(int speed) {
-  analogWrite(P,speed);
-  digitalWrite(A,HIGH);
-  digitalWrite(B,LOW);
+void MotorDriver::init(int pinA, int pinB, int pinP){
+	A = pinA; 
+	B = pinB;
+	P = pinP;
+	init();
 }
 
-void MotorDriver::backward(int speed){
-  analogWrite(P,speed);
-  digitalWrite(B,HIGH);
-  digitalWrite(A,LOW);
-}
 
-void MotorDriver::off(){
-  digitalWrite(P,LOW);
-  digitalWrite(A,LOW);
-  digitalWrite(B,LOW);
+void MotorDriver::setSpeed(int speed){
+	if (speed>0) forward(speed);
+	else if (speed<0) backward(-speed);
+	else off();
 }
 
 void MotorDriver::brake(bool high /*= false*/){
-  digitalWrite(P,HIGH);
-  digitalWrite(A,high);
-  digitalWrite(B,high);
+	digitalWrite(P,HIGH);
+	digitalWrite(A,high);
+	digitalWrite(B,high);
 }
 
 

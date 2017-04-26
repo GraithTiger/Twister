@@ -6,8 +6,7 @@
 
 class TiltMotor{
   public:
-    TiltMotor();
-    TiltMotor(int A, int B, int P, int Hi, int Lo): T(A,B,P), H(Hi), L(Lo) {};
+    TiltMotor(int pinA, int pinB, int pinP, int Hi, int Lo): A(pinA), B(pinB), P(pinP) { H = Hi; L=Lo; };
     void init();
     bool home();
     void tiltUp();
@@ -16,13 +15,15 @@ class TiltMotor{
     bool curPos() {return pos;};
     static void finishTilt();
     static void finishHome();
-    static TiltMotor *tilt = NULL;
+    static TiltMotor* spthis = NULL;
   private:
     int pos;
     const int speed = 127;
-    volatile bool homed;
-    int H, L;
-    MotorDriver T;
+    static volatile bool homed;
+    static char* message;
+    static int H, L;
+	int A, B, P;
+    static MotorDriver T;
 };
 
 #endif

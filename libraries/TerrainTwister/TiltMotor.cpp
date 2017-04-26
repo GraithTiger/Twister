@@ -1,8 +1,15 @@
 #include <TiltMotor.h>
 #include <MotorDriver.h>
 
+MotorDriver TiltMotor::T = MotorDriver();
+int TiltMotor::H;
+int TiltMotor::L;
+volatile bool TiltMotor::homed;
+char* TiltMotor::message;
+
+
 void TiltMotor::init() {
-  T.init();
+  T.init(A,B,P);
   pinMode(H, INPUT_PULLUP);
   pinMode(L, INPUT_PULLUP);
 }
@@ -14,6 +21,7 @@ bool TiltMotor::home() {
     pos = 0;
     return homed;
   }
+  message = "finished home\n";
   attachInterrupt(digitalPinToInterrupt(H),finishHome, RISING);
   attachInterrupt(digitalPinToInterrupt(L),finishHome, RISING);
   T.forward(speed); //try tilting up first;
@@ -30,6 +38,7 @@ bool TiltMotor::home() {
 
 void TiltMotor::tiltUp(){
   if (pos>0) return;
+  message = "tilted up\n";
   attachInterrupt(digitalPinToInterrupt(H),finishTilt, FALLING);
   attachInterrupt(digitalPinToInterrupt(L),finishTilt, FALLING);
   T.forward(speed);
@@ -38,6 +47,7 @@ void TiltMotor::tiltUp(){
 
 void TiltMotor::tiltNeutral(){
   if (pos==0) return;
+  message = "returned to neutral\n";
   if (pos>0) {
   attachInterrupt(digitalPinToInterrupt(H),finishTilt, RISING);
   attachInterrupt(digitalPinToInterrupt(L),finishTilt, RISING);
@@ -53,6 +63,7 @@ void TiltMotor::tiltNeutral(){
 
 void TiltMotor::tiltDown(){
   if (pos<0) return;
+  message = "tilted down\n";
   attachInterrupt(digitalPinToInterrupt(H),finishTilt, FALLING);
   attachInterrupt(digitalPinToInterrupt(L),finishTilt, FALLING);
   T.backward(speed);
@@ -60,15 +71,17 @@ void TiltMotor::tiltDown(){
 }
 
 void TiltMotor::finishHome(){
-  detachInterrupt(digitalPinToInterrupt(tilt->H));
-  detachInterrupt(digitalPinToInterrupt(tilt->L));
-  tilt->T.brake();
-  tilt->homed = true;
+  detachInterrupt(digitalPinToInterrupt(H));
+  detachInterrupt(digitalPinToInterrupt(L));
+  T.brake();
+  homed = true;
+  Serial.println(message);
 }
 
 void TiltMotor::finishTilt(){
-  detachInterrupt(digitalPinToInterrupt(tilt->H));
-  detachInterrupt(digitalPinToInterrupt(tilt->L));
-  tilt->T.brake();
+  detachInterrupt(digitalPinToInterrupt(H));
+  detachInterrupt(digitalPinToInterrupt(L));
+  T.brake();
+  Serial.write(message);
 }
 

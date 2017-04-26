@@ -8,7 +8,7 @@
 #define XSHUT_pin5 9
 #define XSHUT_pin4 8
 #define XSHUT_pin3 7
-#define XSHUT_pin2 6
+#define XSHUT_pin2 5
 #define XSHUT_pin1 3
 
 //ADDRESS_DEFAULT 0b0101001 or 41
@@ -34,6 +34,7 @@ Servo rightservo;*/
 #define leftA 2
 #define leftB 4
 #define leftP 9
+#define leftCS A0
 #define leftEnable 6
 
 #define rightA 7
@@ -56,8 +57,8 @@ void setup()
 { /*WARNING*/
   //Shutdown pins of VL53L0X ACTIVE-LOW-ONLY NO TOLERANT TO 5V will fry them
   pinMode(XSHUT_pin1, OUTPUT);
-  /*pinMode(XSHUT_pin2, OUTPUT);
-  pinMode(XSHUT_pin3, OUTPUT);
+  pinMode(XSHUT_pin2, OUTPUT);
+  /*pinMode(XSHUT_pin3, OUTPUT);
   pinMode(XSHUT_pin4, OUTPUT);
   pinMode(XSHUT_pin5, OUTPUT);*/
   
@@ -74,9 +75,9 @@ void setup()
   Sensor4.setAddress(Sensor4_newAddress);
   pinMode(XSHUT_pin3, INPUT);
   delay(10);
-  Sensor3.setAddress(Sensor3_newAddress);
+  Sensor3.setAddress(Sensor3_newAddress);*/
   pinMode(XSHUT_pin2, INPUT);
-  delay(10);*/
+  delay(10);
   Sensor2.setAddress(Sensor2_newAddress);
   pinMode(XSHUT_pin1, INPUT);
   delay(10);
@@ -145,11 +146,12 @@ void loop()
   */
   int ss_speed = 0;
   int position_diff = left - right;
-  int Kp = 2;
-  int correction = ss_speed + abs(position_diff)*Kp;
-
-  leftScrew.speed(correction);
-  rightScrew.speed(-correction);
+  int Kp = 3;
+  int correction = ss_speed + position_diff/Kp;
+  if (abs(position_diff) < 500){
+	leftScrew.setSpeed(correction);
+	rightScrew.setSpeed(-correction);
+  }
   /*
   if (position_diff > 0)
   {
