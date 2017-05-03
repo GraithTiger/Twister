@@ -16,20 +16,19 @@
 #define tiltA A3
 #define tiltB A2
 #define tiltP 11
-#define tiltHi 2
-#define tiltLo 3
+#define tiltSense 3
 
 MotorDriver left = MotorDriver(leftA,leftB,leftP);
 MotorDriver right = MotorDriver(rightA,rightB,rightP);
-TiltMotor tilt = TiltMotor(tiltA,tiltB,tiltP,tiltHi,tiltLo);
+TiltMotor tilt = TiltMotor(tiltA,tiltB,tiltP,tiltSense);
 
 void setup(){
   tilt.init();
   left.init();
   right.init();
+  Serial.begin(9600);
   delay(1000);
   tilt.home();
-  Serial.begin(9600);
 }
 
 void loop(){

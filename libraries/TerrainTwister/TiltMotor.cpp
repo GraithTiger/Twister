@@ -2,35 +2,33 @@
 #include <MotorDriver.h>
 
 MotorDriver TiltMotor::T = MotorDriver();
-int TiltMotor::H;
-int TiltMotor::L;
+int TiltMotor::S;
 volatile bool TiltMotor::homed;
 char* TiltMotor::message;
 
 
 void TiltMotor::init() {
   T.init(A,B,P);
-  pinMode(H, INPUT_PULLUP);
-  pinMode(L, INPUT_PULLUP);
+  pinMode(S, INPUT_PULLUP);
 }
 
 bool TiltMotor::home() {
   homed = false;
-  if (digitalRead(H) && digitalRead(L)) {
+  Serial.println("homing");
+  if (digitalRead(S)==LOW) {
     homed = true;
     pos = 0;
     return homed;
   }
   message = "finished home\n";
-  attachInterrupt(digitalPinToInterrupt(H),finishHome, RISING);
-  attachInterrupt(digitalPinToInterrupt(L),finishHome, RISING);
-  T.forward(speed); //try tilting up first;
+  attachInterrupt(digitalPinToInterrupt(S),finishHome, FALLING);
+  T.forward(speed*3/4); //try tilting up first;
   delay(3000);
   if (homed) {
     pos = 0;
     return homed;
   }
-  T.backward(speed); //if not homed yet, try tilting down.
+  T.backward(speed*3/4); //if not homed yet, try tilting down.
   delay(3000);
   if (homed) pos = 0;
   return homed;
@@ -38,49 +36,46 @@ bool TiltMotor::home() {
 
 void TiltMotor::tiltUp(){
   if (pos>0) return;
+  Serial.println("tilting up");
   message = "tilted up\n";
-  attachInterrupt(digitalPinToInterrupt(H),finishTilt, FALLING);
-  attachInterrupt(digitalPinToInterrupt(L),finishTilt, FALLING);
+  attachInterrupt(digitalPinToInterrupt(S),finishTilt, RISING);
   T.forward(speed);
   pos = 1;
 }
 
 void TiltMotor::tiltNeutral(){
   if (pos==0) return;
+  Serial.println("returning to neutral");
   message = "returned to neutral\n";
   if (pos>0) {
-  attachInterrupt(digitalPinToInterrupt(H),finishTilt, RISING);
-  attachInterrupt(digitalPinToInterrupt(L),finishTilt, RISING);
-  T.backward(speed);
+  attachInterrupt(digitalPinToInterrupt(S),finishTilt, FALLING);
+  T.backward(speed*3/4);
   }
-  if (pos>0) {
-  attachInterrupt(digitalPinToInterrupt(H),finishTilt, RISING);
-  attachInterrupt(digitalPinToInterrupt(L),finishTilt, RISING);
-  T.forward(speed);
+  else if (pos<0) {
+  attachInterrupt(digitalPinToInterrupt(S),finishTilt, FALLING);
+  T.forward(speed*3/4);
   }
   pos = 0;
 }
 
 void TiltMotor::tiltDown(){
   if (pos<0) return;
+  Serial.println("tilting down");
   message = "tilted down\n";
-  attachInterrupt(digitalPinToInterrupt(H),finishTilt, FALLING);
-  attachInterrupt(digitalPinToInterrupt(L),finishTilt, FALLING);
+  attachInterrupt(digitalPinToInterrupt(S),finishTilt, RISING);
   T.backward(speed);
   pos = -1;
 }
 
 void TiltMotor::finishHome(){
-  detachInterrupt(digitalPinToInterrupt(H));
-  detachInterrupt(digitalPinToInterrupt(L));
+  detachInterrupt(digitalPinToInterrupt(S));
   T.brake();
   homed = true;
-  Serial.println(message);
+  Serial.write(message);
 }
 
 void TiltMotor::finishTilt(){
-  detachInterrupt(digitalPinToInterrupt(H));
-  detachInterrupt(digitalPinToInterrupt(L));
+  detachInterrupt(digitalPinToInterrupt(S));
   T.brake();
   Serial.write(message);
 }
