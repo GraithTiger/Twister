@@ -3,12 +3,16 @@
 
 #include <Arduino.h>
 
-class MotorDriver{
-	int A, B, P, CS;
+extern "C" void ADC_vect(void) __attribute__((signal));
+extern "C" void TIMER2_OVF_vect(void) __attribute__((signal));
 
+class MotorDriver{
+	friend void ::ADC_vect(void);
+	friend void ::TIMER2_OVF_vect(void);
+	
 	public:
-		MotorDriver(int pinA, int pinB, int pwmPin) : A(pinA), B(pinB), P(pwmPin), CS(-1){};
-		MotorDriver() : A(-1), B(-1), P(-1) {};
+		MotorDriver(int pinA, int pinB, int pwmPin) : A(pinA), B(pinB), P(pwmPin), CS(-1), Set(0), aPos(-1), CSenabled(false){};
+		MotorDriver() : A(-1), B(-1), P(-1), CS(-1) aPos(-1) cpos(-1) CSenabled(false) {};
 		void init();
 		void init(int pinA, int pinB, int pinP );
 		inline void MotorDriver::forward(int speed) {
@@ -29,6 +33,17 @@ class MotorDriver{
 		}
 		void setSpeed(int);
 		void brake(bool high = false);
+		static uint8_t queueAnalogSense(uint8_t);
+		static inline int readAnalogSense(uint8_t position) {return *(analogQueue+position)};
+	private:
+		int A, B, P, CS, Set;
+		uint8_t aPos;
+		bool CSenabled;
+		static int numC, numCS;
+		static MotorDriver *currentQueue;
+		static int* analogQueue;
+		static volatile int* analogReadings;
+		static void queueCurrent();
 };
 
 #endif
