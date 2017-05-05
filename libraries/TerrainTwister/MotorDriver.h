@@ -11,8 +11,8 @@ class MotorDriver{
 	friend void ::TIMER2_OVF_vect(void);
 	
 	public:
-		MotorDriver(int pinA, int pinB, int pwmPin) : A(pinA), B(pinB), P(pwmPin), CS(-1), Set(0), aPos(-1), CSenabled(false){};
-		MotorDriver() : A(-1), B(-1), P(-1), CS(-1) aPos(-1) cpos(-1) CSenabled(false) {};
+		MotorDriver(int pinA, int pinB, int pwmPin) : A(pinA), B(pinB), P(pwmPin), CS(-1){};
+		MotorDriver() : A(-1), B(-1), P(-1), CS(-1) {};
 		void init();
 		void init(int pinA, int pinB, int pinP );
 		inline void MotorDriver::forward(int speed) {
