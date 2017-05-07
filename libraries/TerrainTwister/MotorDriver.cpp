@@ -1,5 +1,9 @@
 #include <MotorDriver.h>
 
+int MotorDriver::numC, MotorDriver::numCS;
+MotorDriver* MotorDriver::currentQueue;
+int* MotorDriver::analogQueue;
+volatile int* MotorDriver::analogReadings;
 
 void MotorDriver::init(){
 	if (A>=0) pinMode(A,OUTPUT);
