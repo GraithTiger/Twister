@@ -9,7 +9,13 @@ void MotorDriver::init(){
 	if (A>=0) pinMode(A,OUTPUT);
 	if (B>=0) pinMode(B,OUTPUT);
 	if (P>=0) pinMode(P,OUTPUT);
-	if (CS>=0) pinMode(CS, INPUT);
+	if (CS>=0) {
+		if (CS>14) {
+			pinMode(CS, INPUT);
+			#if defined(__AVR_Atmega328P__)
+				CS -=14;
+			#endif
+		}
 	this->off();
 }
 
