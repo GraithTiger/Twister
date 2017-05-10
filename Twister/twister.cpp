@@ -2,14 +2,13 @@
 #include <Wire.h>
 #include <TerrainTwister.h>
 #include <VL53L0X.h>
-#include <Servo.h>
 
 //#define XSHUT_pin6 not required for address change
-#define XSHUT_pin5 9
-#define XSHUT_pin4 8
-#define XSHUT_pin3 7
-#define XSHUT_pin2 5
-#define XSHUT_pin1 3
+//#define XSHUT_pin5 9
+//#define XSHUT_pin4 8
+#define XSHUT_pin3 A2
+#define XSHUT_pin2 6
+#define XSHUT_pin1 12
 
 //ADDRESS_DEFAULT 0b0101001 or 41
 //#define Sensor1_newAddress 41 not required address change
@@ -22,35 +21,30 @@
 
 VL53L0X Sensor1;
 VL53L0X Sensor2;
-/*VL53L0X Sensor3;
-VL53L0X Sensor4;
+VL53L0X Sensor3;
+/*VL53L0X Sensor4;
 VL53L0X Sensor5;
-VL53L0X Sensor6;
-
-Servo leftservo;
-Servo rightservo;*/
+VL53L0X Sensor6;*/
 
 //pin definitions
 #define leftA 2
 #define leftB 4
 #define leftP 9
-#define leftCS A0
-#define leftEnable 6
+#define leftCS 0
 
 #define rightA 7
 #define rightB 8
 #define rightP 10
-#define rightEnable 12
+#define rightCS 1
 
-#define tiltA A2
-#define tiltB A3
-#define tiltP 11
-#define tiltHi 2
-#define tiltLo 3
+#define tiltA 11
+#define tiltB 13
+#define tiltP 5
+#define tiltSense 3
 
 MotorDriver leftScrew = MotorDriver(leftA,leftB,leftP);
 MotorDriver rightScrew = MotorDriver(rightA,rightB,rightP);
-//TiltMotor::tilt = new TiltMotor(tiltA,tiltB,tiltP,tiltHi,tiltLo);
+TiltMotor tilt = TiltMotor(tiltA,tiltB,tiltP,tiltSense);
 
 
 void setup()
@@ -58,8 +52,8 @@ void setup()
   //Shutdown pins of VL53L0X ACTIVE-LOW-ONLY NO TOLERANT TO 5V will fry them
   pinMode(XSHUT_pin1, OUTPUT);
   pinMode(XSHUT_pin2, OUTPUT);
-  /*pinMode(XSHUT_pin3, OUTPUT);
-  pinMode(XSHUT_pin4, OUTPUT);
+  pinMode(XSHUT_pin3, OUTPUT);
+  /*pinMode(XSHUT_pin4, OUTPUT);
   pinMode(XSHUT_pin5, OUTPUT);*/
   
   Serial.begin(9600);
@@ -72,10 +66,10 @@ void setup()
   Sensor5.setAddress(Sensor5_newAddress);
   pinMode(XSHUT_pin4, INPUT);
   delay(10);
-  Sensor4.setAddress(Sensor4_newAddress);
+  Sensor4.setAddress(Sensor4_newAddress);*/
   pinMode(XSHUT_pin3, INPUT);
   delay(10);
-  Sensor3.setAddress(Sensor3_newAddress);*/
+  Sensor3.setAddress(Sensor3_newAddress);
   pinMode(XSHUT_pin2, INPUT);
   delay(10);
   Sensor2.setAddress(Sensor2_newAddress);
@@ -84,15 +78,15 @@ void setup()
   
   Sensor1.init();
   Sensor2.init();
-  /*Sensor3.init();
-  Sensor4.init();
+  Sensor3.init();
+  /*Sensor4.init();
   Sensor5.init();
   Sensor6.init();*/
   
   Sensor1.setTimeout(500);
   Sensor2.setTimeout(500);
-  /*Sensor3.setTimeout(500);
-  Sensor4.setTimeout(500);
+  Sensor3.setTimeout(500);
+  /*Sensor4.setTimeout(500);
   Sensor5.setTimeout(500);
   Sensor6.setTimeout(500);*/
 
@@ -102,17 +96,16 @@ void setup()
   // ms (e.g. sensor.startContinuous(100)).
   Sensor1.startContinuous();
   Sensor2.startContinuous();
-  /*Sensor3.startContinuous();
-  Sensor4.startContinuous();
+  Sensor3.startContinuous();
+  /*Sensor4.startContinuous();
   Sensor5.startContinuous();
   Sensor6.startContinuous();*/
 
   //Motor Stuff
   leftScrew.init();
   rightScrew.init();
-  //leftservo.attach(10);
-  //rightservo.attach(9);
-
+  tilt.init();
+  tilt.home();
 }
 
 void loop()
@@ -122,28 +115,12 @@ void loop()
   int right = Sensor2.readRangeContinuousMillimeters();
   Serial.print(left);
   Serial.print(',');
- 
   Serial.print(right);
-  Serial.println();
-  /*
-  Base code hold over  
-  Serial.print(Sensor1.readRangeContinuousMillimeters());
+  //Serial.println();
   Serial.print(',');
- 
-  Serial.print(Sensor2.readRangeContinuousMillimeters());
-  Serial.println();
-  
-  /*
-  //Serial.print(Sensor3.readRangeContinuousMillimeters());
-  //Serial.print(','); Did not work for me result was 65535
-  
-  Serial.print(Sensor4.readRangeContinuousMillimeters());
-  Serial.print(',');
-  Serial.print(Sensor5.readRangeContinuousMillimeters());
-  Serial.print(',');
-  Serial.print(Sensor6.readRangeContinuousMillimeters());
-  Serial.println();
-  */
+  Serial.println(Sensor3.readRangeContinuousMillimeters());
+
+  //P control loop for centering
   int ss_speed = 0;
   int position_diff = left - right;
   int Kp = 3;
@@ -152,23 +129,6 @@ void loop()
 	leftScrew.setSpeed(correction);
 	rightScrew.setSpeed(-correction);
   }
-  /*
-  if (position_diff > 0)
-  {
-    rightservo.write(94+ correction);
-    leftservo.write(95- ss_speed);
-  }
-  else if (position_diff < 0)
-  {
-    rightservo.write(94- ss_speed);
-    leftservo.write(95+ correction); 
-  }
-  else
-  {
-    rightservo.write(94- ss_speed);
-    leftservo.write(95+ ss_speed);
-  }  
-  */
 }
 
 
