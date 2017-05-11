@@ -6,7 +6,7 @@
 
 class TiltMotor{
   public:
-    TiltMotor(int pinA, int pinB, int pinP, int sense): A(pinA), B(pinB), P(pinP) { S = sense; };
+    TiltMotor(int pinA, int pinB, int pinP, int sense) : pos(0), A(pinA), B(pinB), P(pinP) { S = sense; };
     void init();
     bool home();
     void tiltUp();
@@ -20,7 +20,7 @@ class TiltMotor{
     int pos;
     const int speed = 255;
     static volatile bool homed;
-    static char* message;
+    //static char* message;
     static int S;
 	int A, B, P;
     static MotorDriver T;

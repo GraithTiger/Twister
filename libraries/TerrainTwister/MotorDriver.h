@@ -12,14 +12,14 @@ class MotorDriver{
 	
 	public:
 		MotorDriver(int pinA, int pinB, int pwmPin) :
-			A(pinA), B(pinB), P(pwmPin), CS(-1), HiFreq(false),
-			aPos(-1), CCenabled(false), Set(0), Kp(10) {};
+			A(pinA), B(pinB), P(pwmPin), CS(-1), Set(0), Kp(10),
+			aPos(-1), CCenabled(false), HiFreq(false) {};
 		MotorDriver(int pinA, int pinB, int pwmPin, int CSpin) :
-			A(pinA), B(pinB), P(pwmPin), CS(CSpin), HiFreq(false),
-			aPos(-1), CCenabled(false), Set(0), Kp(10)  {};
+			A(pinA), B(pinB), P(pwmPin), CS(CSpin), Set(0), Kp(10),
+			aPos(-1), CCenabled(false), HiFreq(false) {};
 		MotorDriver() :
-			A(-1), B(-1), P(-1), CS(-1), HiFreq(false),
-			aPos(-1), CCenabled(false), Set(0), Kp(10)  {};
+			A(-1), B(-1), P(-1), CS(-1), Set(0), Kp(10),
+			aPos(-1), CCenabled(false), HiFreq(false) {};
 		void init();
 		void init(bool);
 		void init(int pinA, int pinB, int pinP );
@@ -42,7 +42,7 @@ class MotorDriver{
 		static volatile int adcPos;
 		static volatile int* analogReadings;
 		void initCurrent();
-		inline void MotorDriver::forward(int speed) {
+		inline void forward(int speed) {
 			speed = constrain(speed,0,400);
 			if (HiFreq && P==9) OCR1A = speed;
 			else if (HiFreq && P==10) OCR1B = speed;

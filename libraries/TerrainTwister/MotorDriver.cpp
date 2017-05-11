@@ -58,44 +58,52 @@ void MotorDriver::initCurrent(){
 		//setup timer2 interrupt here
 		TIFR2 &= B11111110; //
 		TIMSK2 |= B00000001; //set Timer 2 Interrupt enable
-		currentQueue = {&this};
+		currentQueue = new MotorDriver*[1];
+		currentQueue[0] = this;
 		numCC++;
 	}
 	else {
-		MotorDriver* newQueue[numCC+1];
+		MotorDriver** newQueue = new MotorDriver*[numCC+1];
 		for (int i = 0; i<numCC; i++) {
-			newQueue[i] = (*currentQueue)[i];
+			newQueue[i] = currentQueue[i];
 		}
-		newQueue[numCC] = &this;
+		newQueue[numCC] = this;
 		numCC++;
+		delete [] currentQueue;
 		currentQueue = newQueue;
 	}
 }
 
 uint8_t MotorDriver::queueAnalogSense(uint8_t pin){
 	if (pin>14) {
-		pinMode(CS, INPUT);
+		pinMode(pin, INPUT);
 		#if defined(__AVR_ATmega328P__)
 			pin -= 14;
 		#endif
 	}
 	if (numA == 0) {
-		analogQueue = {pin};
-		analogReadings = {0};
+		analogQueue = new uint8_t[1];
+		analogQueue[1] = pin;
+		analogReadings = new int[1];
+		analogReadings[1] = 0;
 		adcPos = 0;
 		numA++;
 		enableADRI(pin);
 	}
 	else {
-		int newQueue[numA+1];
-		int newReadings[numA+1];
+		uint8_t* newQueue = new uint8_t[numA+1];
+		int* newReadings = new int[numA+1];
 		for (int i=0; i<numA; i++) {
-			newQueue[i] = (*analogQueue)[i];
-			newReadings[i] = (*analogReadings)[i];
+			newQueue[i] = analogQueue[i];
+			newReadings[i] = analogReadings[i];
 		}
 		newQueue[numA] = pin;
+		newReadings[numA] = 0;
 		numA++;
+		delete [] analogQueue;
+		delete [] analogReadings;
 		analogQueue = newQueue;
+		analogReadings = newReadings;
 	}
 	return numA;
 }
@@ -114,6 +122,7 @@ void MotorDriver::setCurrent(long mA){
 }
 
 void MotorDriver::brake(bool high /*= false*/){
+	CCenabled = false;
 	if (HiFreq && P==9) OCR1A = 400;
 	else if (HiFreq && P==10) OCR1B = 400;
 	else analogWrite(P,255);
@@ -123,17 +132,17 @@ void MotorDriver::brake(bool high /*= false*/){
 
 //analog read loop
 ISR(ADC_vect) {
-	(*MotorDriver::analogReadings)[MotorDriver::adcPos] = ADCL | (ADCH << 8); //store reading
+	MotorDriver::analogReadings[MotorDriver::adcPos] = ADCL | (ADCH << 8); //store reading
 	MotorDriver::adcPos++;
 	if (MotorDriver::adcPos>MotorDriver::numA) MotorDriver::adcPos=0;
-	ADMUX |= ((*MotorDriver::analogQueue)[1] & 0x07); //go to next pin to read
+	ADMUX |= (MotorDriver::analogQueue[1] & 0x07); //go to next pin to read
 	ADCSRA |=B01000000; // Set ADSC in ADCSRA (0x7A) to start the ADC conversion
 }
 
 //current control loop
 ISR(TIMER2_OVF_vect) {
 	for (int i = 0; i<MotorDriver::numCC; i++) {
-		MotorDriver* c = (*MotorDriver::currentQueue)[i];
+		MotorDriver* c = MotorDriver::currentQueue[i];
 		if (c->CCenabled) {
 			if (c->Set==0)  c->off();
 			else if (c->Set>0) {
