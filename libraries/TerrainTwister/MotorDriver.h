@@ -30,7 +30,7 @@ class MotorDriver{
 		inline void setKp( int k ) {Kp = k;}
 		static uint8_t queueAnalogSense(uint8_t);
 		static inline int readAnalogSense(uint8_t position) {
-			return *(analogQueue+position);
+			return (analogReadings)[position];
 		}
 	private:
 		int A, B, P, CS, Set, Kp;

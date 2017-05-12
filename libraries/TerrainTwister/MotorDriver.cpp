@@ -118,6 +118,7 @@ void MotorDriver::setSpeed(int speed){
 
 void MotorDriver::setCurrent(long mA){
 	Set = mA/34;
+	Serial.println(Set);
 	CCenabled = true;
 }
 
@@ -132,7 +133,8 @@ void MotorDriver::brake(bool high /*= false*/){
 
 //analog read loop
 ISR(ADC_vect) {
-	MotorDriver::analogReadings[MotorDriver::adcPos] = ADCL | (ADCH << 8); //store reading
+	int reading = ADCL | (ADCH << 8);
+	MotorDriver::analogReadings[MotorDriver::adcPos] =  reading;//store reading
 	MotorDriver::adcPos++;
 	if (MotorDriver::adcPos>MotorDriver::numA) MotorDriver::adcPos=0;
 	ADMUX |= (MotorDriver::analogQueue[1] & 0x07); //go to next pin to read
