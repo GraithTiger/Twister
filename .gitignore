@@ -31,3 +31,4 @@
 */Release
 .metadata
 .project
+*.ino.cpp
